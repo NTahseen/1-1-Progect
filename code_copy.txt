@@ -1,0 +1,886 @@
+# include "iGraphics.h"
+#include<stdio.h>
+#include<string.h>
+
+/*
+page = 1 : login,
+page = 2: select_meal, total_stock;
+*/
+//int total_stock_page = 0;
+//int select_menu_page = 0;
+int page = 10;
+int access = 5;
+int mode = 0;
+int len = 0;
+char str[100];
+char name_match[100];
+char pass_match[100];
+char name[100][40];
+char password[100][40];
+int home_mouse_position = 1;
+//int meal_page = 0; //at page 2
+int person = 10;
+char ingredients[40][20];  //name of each ingredients
+double total_amount[40];   //amount of ingredients in particular index of total array
+char price[40];
+double d1, d2, d3, d4, d5;
+
+int vegetables_position;
+int spices_position;
+int fishes_position;
+int meats_position;
+int others_position;
+
+void show_total_stock()
+{
+    //total_stock_page = 1;
+
+    //iClear();
+    int k = 0;
+    for(int i = 0; i < 23; i++){
+        char s[10];
+        sprintf(s, "%lf", total_amount[i]);
+        iText(60, 690 - k, ingredients[i] , GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(180, 690 - k, s , GLUT_BITMAP_TIMES_ROMAN_24);
+        //printf("%s %lf\n", ingredients[i], total_amount[i]);
+        k += 30;
+    }
+
+}
+
+void read_total_stock(){
+    int i = 0;
+    FILE *ptr;
+    ptr = fopen("total_stock.txt", "r");
+    if(ptr == NULL){
+        printf("total_stock file cant be open\n");
+        return;
+    }
+    else{
+        printf("opened\n");
+    }
+    while(!feof(ptr)){
+
+        fscanf(ptr, "%s", &ingredients[i]);
+        fscanf(ptr, "%lf", &total_amount[i]);
+        i++;
+    }
+
+    for(int i = 0; i < 23; i++){
+        printf("hello     %s %g\n", ingredients[i], total_amount[i]);
+    }
+    //total_stock_page = 2;
+    //show_total_stock();
+
+}
+
+void click_total_stock(int mx, int my)
+{
+    //total_stock_page = 1;
+    if(mx >= 100 && mx <= 150 && my >= 400 && my <= 450){
+     page = 8;
+    read_total_stock();
+    }
+    printf("%d stock pafe\n", page);
+}
+
+
+void totalstock_store()
+{
+    int i = 0;
+    FILE *ptr;
+    ptr = fopen("total_stock.txt", "r+");
+    if(ptr == NULL){
+        printf("total_stock file cant be open\n");
+        return;
+    }
+    //else printf("aluvorta opened\n");
+    while(!feof(ptr)){
+
+        fscanf(ptr, "%s", &ingredients[i]);
+        fscanf(ptr, "%lf", &total_amount[i]);
+        i++;
+    }
+
+    for(int i = 0; i < total_amount[i] != '\0'; i++){
+        printf("%s ", ingredients[i]);
+        printf("%g\n", total_amount[i]);
+    }
+
+}
+
+void update_totalstock()
+{
+    int i = 0;
+    FILE *ptr;
+    ptr = fopen("total_stock.txt", "w");
+    if(ptr == NULL){
+        printf("total_stock file cant be open\n");
+        return;
+    }
+    //else printf("aluvorta opened\n");
+
+    for(int i = 0; i < 23; i++){
+        fprintf(ptr, "%s %g\n", ingredients[i], total_amount[i]);
+
+    }
+
+}
+
+void draw_frontpage()
+{
+    iShowBMP(0,0,"homepage.bmp");
+    iSetColor(25, 0, 51);
+	iText(500, 600, "HELLO!CREATE YOUR OWN MESS!",GLUT_BITMAP_TIMES_ROMAN_24);
+	iText(250, 100, "USERNAME",GLUT_BITMAP_TIMES_ROMAN_24);
+	iFilledRectangle(250,50,370,40);
+	iText(800, 100, "PASSWORD",GLUT_BITMAP_TIMES_ROMAN_24);
+	iFilledRectangle(800,50,370,40);
+	iText(1210, 25, "ENTER",GLUT_BITMAP_TIMES_ROMAN_24);
+	iRectangle(1190,15, 120,40);
+}
+void draw_homepage()
+{
+    iClear();
+	iSetColor(255, 255, 153);
+	//iFilledCircle(30, 640, 20);
+	//iFilledCircle(30, 690, 20);
+	//iText(60, 685, "SELECT MEALS", GLUT_BITMAP_TIMES_ROMAN_24);
+	iSetColor(204, 200, 153);
+	//iText(60, 635, "TOTAL STOCK", GLUT_BITMAP_TIMES_ROMAN_24);
+	iShowBMP(440,80,"chef.bmp");
+	iShowBMP(110,150,"add_item.bmp");
+	iText(100, 400, "TOTAL STOCK", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(100, 110, "ADD ITEMS", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(1070, 400, "SELECT MEALS", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(1070, 110, "EXPENDITURE", GLUT_BITMAP_TIMES_ROMAN_24);
+
+}
+
+
+
+void draw_materials()
+{
+    iClear();
+	iSetColor(160, 160, 160);
+	iShowBMP(0,0,"add_items2.bmp");
+
+    iFilledRectangle(550,62,300,40);
+    iFilledRectangle(550,206,300,40);
+    iFilledRectangle(550,350,300,40);
+    iFilledRectangle(550,494,300,40);
+    iFilledRectangle(550,638,300,40);
+
+    iSetColor(0, 0, 102);
+    iText(640, 72, "OTHERS", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(650, 216, "MEATS", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(640, 360, "FISHES", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(640, 504, "SPICES", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(620, 648, "VEGETABLES", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+void click_materials(int mx, int my){
+    if(mx >= 550 && mx <= 850 && my >= 62 && my <= 102)
+    page = 15;
+    if(mx >= 550 && mx <= 850 && my >= 206 && my <= 246)
+    page = 14;
+    if(mx >= 550 && mx <= 850 && my >= 350 && my <= 390)
+    page = 13;
+    if(mx >= 550 && mx <= 850 && my >= 494 && my <= 534)
+    page = 12;
+    if(mx >= 550 && mx <= 850 && my >= 638 && my <= 678)
+    page = 11;
+}
+
+
+void draw_vegetables()
+{
+    iClear();
+     iShowBMP(0,0,"add_items2.bmp");
+	iSetColor(160, 160, 160);
+    iFilledRectangle(680,62,100,40);
+    iFilledRectangle(680,206,100,40);
+    iFilledRectangle(680,350,100,40);
+    iFilledRectangle(680,494,100,40);
+    iFilledRectangle(680,638,100,40);
+    iFilledRectangle(900,350,130,40);
+
+    iSetColor(192, 192, 192);
+    iText(550, 72, "ALU", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 216, "SIM", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 360, "BEGUN", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 504, "TOMATO", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 648, "GAJOR", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(650, 690, "AMOUNT IN KG", GLUT_BITMAP_TIMES_ROMAN_24);
+    iSetColor(0, 0, 51);
+    iText(915, 360, "UPDATE", GLUT_BITMAP_TIMES_ROMAN_24);
+
+
+}
+
+
+void draw_spices()
+{
+    iClear();
+    iShowBMP(0,0,"add_items2.bmp");
+	iSetColor(160, 160, 160);
+    iFilledRectangle(680,62,100,40);
+    iFilledRectangle(680,206,100,40);
+    iFilledRectangle(680,350,100,40);
+    iFilledRectangle(680,494,100,40);
+    iFilledRectangle(680,638,100,40);
+    iFilledRectangle(900,350,130,40);
+
+    iSetColor(192, 192, 192);
+    iText(550, 72, "PEYAJ", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 216, "MORICH", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 360, "LOBON", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 504, "ADA", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 648, "ROSHUN", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(650, 690, "AMOUNT IN KG", GLUT_BITMAP_TIMES_ROMAN_24);
+    iSetColor(0, 0, 51);
+    iText(915, 360, "UPDATE", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+void draw_fishes()
+{
+    iClear();
+     iShowBMP(0,0,"add_items2.bmp");
+	iSetColor(160, 160, 160);
+    iFilledRectangle(700,62,100,40);
+    iFilledRectangle(700,206,100,40);
+    iFilledRectangle(700,350,100,40);
+    iFilledRectangle(700,494,100,40);
+    iFilledRectangle(700,638,100,40);
+    iFilledRectangle(900,350,130,40);
+
+    iSetColor(192, 192, 192);
+    iText(550, 72, "RUI MACH", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 216, "PABDA", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 360, "PANGASH", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 504, "TELAPIA", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 648, "ILISH", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(600, 690, "AMOUNT IN NUMBERS", GLUT_BITMAP_TIMES_ROMAN_24);
+    iSetColor(0, 0, 51);
+    iText(915, 360, "UPDATE", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+void draw_others()
+{
+    iClear();
+    iShowBMP(0,0,"add_items2.bmp");
+	iSetColor(160, 160, 160);
+    iFilledRectangle(700,62,100,40);
+    iFilledRectangle(700,206,100,40);
+    iFilledRectangle(700,350,100,40);
+    iFilledRectangle(700,494,100,40);
+    iFilledRectangle(700,638,100,40);
+    iFilledRectangle(900,350,130,40);
+
+    iSetColor(192, 192, 192);
+    iText(500, 72, "SORISHAR TEL", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(500, 216, "ATA", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(500, 360, "DIM(EGG)", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(500, 504, "CHAAL", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(500, 648, "DAAL", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(650, 690, "AMOUNT IN KG/LITRE", GLUT_BITMAP_TIMES_ROMAN_24);
+    iSetColor(0, 0, 51);
+    iText(915, 360, "UPDATE", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+
+void click_vegetables(int mx, int my)
+{
+    if(mx >= 680 && mx <= 780 && my >= 62 && my <= 102 && mode == 0)
+		{
+		    vegetables_position = 1;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 206 && my <= 246 && mode == 0)
+		{
+		    vegetables_position = 2;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 350 && my <= 390 && mode == 0)
+		{
+		    vegetables_position = 3;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 494 && my <= 534 && mode == 0)
+		{
+		    vegetables_position = 4;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 638 && my <= 678 && mode == 0)
+		{
+		    vegetables_position = 5;
+			mode = 1;
+		}
+    if(mx >= 900 && mx <= 1130 && my >= 350 && my <= 390){
+            update_totalstock();
+            for(int i = 0; i < 23; i++){
+                printf("%s %g\n", ingredients[i], total_amount[i]);
+            }
+        }
+}
+
+void click_spices(int mx, int my)
+{
+    if(mx >= 680 && mx <= 780 && my >= 62 && my <= 102 && mode == 0)
+		{
+		    spices_position = 1;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 206 && my <= 246 && mode == 0)
+		{
+		    spices_position = 2;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 350 && my <= 390 && mode == 0)
+		{
+		    spices_position = 3;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 494 && my <= 534 && mode == 0)
+		{
+		    spices_position = 4;
+			mode = 1;
+		}
+    if(mx >= 680 && mx <= 780 && my >= 638 && my <= 678 && mode == 0)
+		{
+		    spices_position = 5;
+			mode = 1;
+		}
+    if(mx >= 900 && mx <= 1130 && my >= 350 && my <= 390){
+            update_totalstock();
+            for(int i = 0; i < 23; i++){
+                printf("%s %g\n", ingredients[i], total_amount[i]);
+            }
+        }
+}
+
+void click_fishes(int mx, int my)
+{
+    if(mx >= 700 && mx <= 800 && my >= 62 && my <= 102 && mode == 0)
+		{
+		    fishes_position = 1;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 206 && my <= 246 && mode == 0)
+		{
+		    fishes_position = 2;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 350 && my <= 390 && mode == 0)
+		{
+		    fishes_position = 3;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 494 && my <= 534 && mode == 0)
+		{
+		    fishes_position = 4;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 638 && my <= 678 && mode == 0)
+		{
+		    fishes_position = 5;
+			mode = 1;
+		}
+    if(mx >= 900 && mx <= 1130 && my >= 350 && my <= 390){
+            update_totalstock();
+            for(int i = 0; i < 23; i++){
+                printf("%s %g\n", ingredients[i], total_amount[i]);
+            }
+        }
+}
+
+void click_others(int mx, int my)
+{
+    if(mx >= 700 && mx <= 800 && my >= 62 && my <= 102 && mode == 0)
+		{
+		    others_position = 1;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 206 && my <= 246 && mode == 0)
+		{
+		    others_position = 2;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 350 && my <= 390 && mode == 0)
+		{
+		    others_position = 3;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 494 && my <= 534 && mode == 0)
+		{
+		    others_position = 4;
+			mode = 1;
+		}
+    if(mx >= 700 && mx <= 800 && my >= 638 && my <= 678 && mode == 0)
+		{
+		    others_position = 5;
+			mode = 1;
+		}
+    if(mx >= 900 && mx <= 1130 && my >= 350 && my <= 390){
+            update_totalstock();
+            for(int i = 0; i < 23; i++){
+                printf("%s %g\n", ingredients[i], total_amount[i]);
+            }
+        }
+}
+
+void draw_veg_options() {
+
+	if(mode == 1){
+	    if(vegetables_position == 1)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 72, str);
+	    }
+	    if(vegetables_position == 2)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 216, str);
+	    }
+	    if(vegetables_position == 3)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 360, str);
+	    }
+	    if(vegetables_position == 4)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 504, str);
+	    }
+	    if(vegetables_position == 5)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 648, str);
+	    }
+
+	//iText(10, 10, "Click to activate the box, enter to finish.");
+	}
+}
+
+void draw_spices_options() {
+
+	if(mode == 1){
+	    if(spices_position == 1)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 72, str);
+	    }
+	    if(spices_position == 2)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 216, str);
+	    }
+	    if(spices_position == 3)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 360, str);
+	    }
+	    if(spices_position == 4)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 504, str);
+	    }
+	    if(spices_position == 5)
+	    {
+		iSetColor(0, 0, 51);
+		iText(690, 648, str);
+	    }
+
+	//iText(10, 10, "Click to activate the box, enter to finish.");
+	}
+}
+
+void draw_fishes_options() {
+
+	if(mode == 1){
+	    if(fishes_position == 1)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 72, str);
+	    }
+	    if(fishes_position == 2)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 216, str);
+	    }
+	    if(fishes_position == 3)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 360, str);
+	    }
+	    if(fishes_position == 4)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 504, str);
+	    }
+	    if(fishes_position == 5)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 648, str);
+	    }
+
+	//iText(10, 10, "Click to activate the box, enter to finish.");
+	}
+}
+
+
+void draw_others_options() {
+
+	if(mode == 1){
+	    if(others_position == 1)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 72, str);
+	    }
+	    if(others_position == 2)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 216, str);
+	    }
+	    if(others_position == 3)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 360, str);
+	    }
+	    if(others_position == 4)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 504, str);
+	    }
+	    if(others_position == 5)
+	    {
+		iSetColor(0, 0, 51);
+		iText(710, 648, str);
+	    }
+
+	//iText(10, 10, "Click to activate the box, enter to finish.");
+	}
+}
+
+/*
+	function iKeyboard() is called whenever the user hits a key in keyboard.
+	key- holds the ASCII value of the key pressed.
+	*/
+void iKeyboard(unsigned char key) {
+	int i;
+    if(mode == 1)
+	{
+        if(key == 13)  //enter
+        {
+            mode = 0;
+            if(page == 1){
+            if(home_mouse_position == 1)strcpy(name_match,str);
+            if(home_mouse_position == 2)strcpy(pass_match, str);
+            }
+
+            if(page == 11){
+
+                int d = atoi(str);
+                /*
+                printf("%lf", 1.0*d);
+                update_vegetables(1.0*d);
+                */
+                if(vegetables_position == 1){
+                    total_amount[0] += 1.0*d;  //alu
+                }
+
+                if(vegetables_position == 2){
+                    total_amount[1] += 1.0*d;  //sim
+                }
+
+                if(vegetables_position == 3){
+                    total_amount[2] += 1.0*d;  //begun
+                }
+
+                if(vegetables_position == 4){
+                    total_amount[3] += 1.0*d;  //tomato
+                }
+
+                if(vegetables_position == 5){
+                    total_amount[4] += 1.0*d;  //gajor
+                }
+            }
+
+             if(page == 12){
+
+                int d = atoi(str);
+                /*
+                printf("%lf", 1.0*d);
+                update_vegetables(1.0*d);
+                */
+                if(spices_position == 1){
+                    total_amount[5] += 1.0*d;  //peyaj
+                }
+
+                if(spices_position == 2){
+                    total_amount[6] += 1.0*d;  //morich
+                }
+
+                if(spices_position == 3){
+                    total_amount[7] += 1.0*d;  //lobon
+
+                }
+
+                if(spices_position == 4){
+                    total_amount[8] += 1.0*d;  //ada
+
+                }
+
+                if(spices_position == 5){
+                    total_amount[9] += 1.0*d;  //roshun
+                }
+            }
+
+
+             if(page == 13){
+
+                int d = atoi(str);
+                /*
+                printf("%lf", 1.0*d);
+                update_vegetables(1.0*d);
+                */
+                if(fishes_position == 1){
+                    total_amount[10] += 1.0*d;  //rui
+                }
+
+                if(fishes_position == 2){
+                    total_amount[11] += 1.0*d;  //pabda
+                }
+
+                if(fishes_position == 3){
+                    total_amount[12] += 1.0*d;  //pangash
+
+                }
+
+                if(fishes_position == 4){
+                    total_amount[13] += 1.0*d;  //telapia
+
+                }
+
+                if(fishes_position == 5){
+                    total_amount[14] += 1.0*d;  //ilish
+                }
+            }
+
+            if(page == 15){
+
+                int d = atoi(str);
+                /*
+                printf("%lf", 1.0*d);
+                update_vegetables(1.0*d);
+                */
+                if(others_position == 1){
+                    total_amount[18] += 1.0*d;  //shorishartel
+                }
+
+                if(others_position == 2){
+                    total_amount[19] += 1.0*d;  //ata
+                }
+
+                if(others_position == 3){
+                    total_amount[20] += 1.0*d;  //dim
+
+                }
+
+                if(others_position == 4){
+                    total_amount[21] += 1.0*d;  //chaal
+
+                }
+
+                if(others_position == 5){
+                    total_amount[22] += 1.0*d;  //daal
+                }
+            }
+
+           // printf("%s %s\n", name_match, pass_match);
+           //printf("%s\n", s2);
+            for(i = 0; i < len; i++)
+                str[i] = 0;
+            len = 0;
+        }
+        else if(key == 8){
+            len--;
+            str[len] = '\0';
+
+        }
+        else
+        {
+           str[len] = key;
+           len++;
+        }
+    }
+
+}
+
+void iDraw() {
+	//place your drawing codes here
+	iClear();
+
+	//if(page == 2)draw_homepage();
+
+	if(page == 10)draw_materials();
+	if(page == 11){
+        draw_vegetables();
+	    if(mode == 1)draw_veg_options();
+	}
+	if(page == 12){
+        draw_spices();
+	    if(mode == 1)draw_spices_options();
+	}
+	if(page == 13){
+        draw_fishes();
+	    if(mode == 1)draw_fishes_options();
+	}
+	if(page == 15){
+        draw_others();
+	    if(mode == 1)draw_others_options();
+	}
+}
+
+/*
+	function iMouseMove() is called when the user presses and drags the mouse.
+	(mx, my) is the position where the mouse pointer is.
+	*/
+void iMouseMove(int mx, int my) {
+	printf("x = %d, y= %d\n",mx,my);
+	//place your codes here
+
+}
+
+/*
+	function iMouse() is called when the user presses/releases the mouse.
+	(mx, my) is the position where the mouse pointer is.
+	*/
+void iMouse(int button, int state, int mx, int my) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		//place your codes here
+		//	printf("x = %d, y= %d\n",mx,my);
+		//click_aluvorta(mx, my);
+
+		/*
+		if(page == 2){
+                read_total_stock();
+                click_total_stock(mx,my);
+               // click_select_menu(mx,my);
+		}
+		*/
+
+
+		//if(page == 2)click_select_menu(mx,my);
+		if(page == 10){
+            read_total_stock();
+            click_materials(mx,my);
+
+		}
+		if(page == 11){
+            click_vegetables(mx,my);
+
+		}
+		if(page == 12){
+            click_spices(mx,my);
+		}
+		if(page == 13){
+            click_fishes(mx,my);
+		}
+		if(page == 15){
+            click_others(mx,my);
+		}
+
+	}
+
+
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		//place your codes here
+
+	}
+}
+
+/*
+	function iKeyboard() is called whenever the user hits a key in keyboard.
+	key- holds the ASCII value of the key pressed.
+	*/
+/*
+void iKeyboard(unsigned char key) {
+	if (key == 'q') {
+		exit(0);
+	}
+	if(key == 's'){
+        page = 8;
+	}
+	//place your codes for other keys here
+}
+*/
+/*
+	function iSpecialKeyboard() is called whenver user hits special keys like-
+	function keys, home, end, pg up, pg down, arraows etc. you have to use
+	appropriate constants to detect them. A list is:
+	GLUT_KEY_F1, GLUT_KEY_F2, GLUT_KEY_F3, GLUT_KEY_F4, GLUT_KEY_F5, GLUT_KEY_F6,
+	GLUT_KEY_F7, GLUT_KEY_F8, GLUT_KEY_F9, GLUT_KEY_F10, GLUT_KEY_F11, GLUT_KEY_F12,
+	GLUT_KEY_LEFT, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_DOWN, GLUT_KEY_PAGE UP,
+	GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
+	*/
+void iSpecialKeyboard(unsigned char key) {
+
+	if (key == GLUT_KEY_END) {
+		exit(0);
+	}
+	//place your codes for other keys here
+}
+
+
+int main() {
+	//place your own initialization codes here.
+	iInitialize(1324, 720, "mess managing");
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+void draw_meats()
+{
+    iClear();
+    iShowBMP(0,0,"add_items2.bmp");
+	iSetColor(160, 160, 160);
+    //iFilledRectangle(650,62,100,40);
+    iFilledRectangle(650,206,100,40);
+    iFilledRectangle(650,350,100,40);
+    iFilledRectangle(650,494,100,40);
+    //iFilledRectangle(650,638,100,40);
+
+    iSetColor(192, 192, 192);
+    //iText(550, 72, "MURGI", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 216, "MURGI", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 360, "GORU", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 504, "KHASHI", GLUT_BITMAP_TIMES_ROMAN_24);
+    //iText(550, 648, "ROSHUN", GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(550, 690, "AMOUNT IN KG", GLUT_BITMAP_TIMES_ROMAN_24);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
